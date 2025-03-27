@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useAppSelector } from '../hooks/useAppSelector';
 import { useAppDispatch } from '../hooks/useAppDispatch';
@@ -6,6 +6,7 @@ import { fireShot } from '../store/gameSlice';
 import { BOARD_SIZE } from '../types';
 import Cell from './Cell';
 import ShipStatus from './ShipStatus';
+import PlayerScore from './PlayerScore';
 
 const BoardContainer = styled.div`
   display: grid;
@@ -186,79 +187,6 @@ const ResetButton = styled.button`
   }
 `;
 
-const PlayerScore = styled.div<{ player: 'player1' | 'player2' }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  background-color: ${props => props.player === 'player1' ? '#FF8C00' : '#4CAF50'};
-  
-  /* Desktop */
-  @media (min-width: 769px) {
-    border-radius: 8px;
-    padding: 8px 15px;
-    min-width: 100px;
-  }
-  
-  /* Tablet */
-  @media (min-width: 481px) and (max-width: 768px) {
-    border-radius: 8px;
-    padding: 8px 15px;
-    width: 100%;
-    min-width: unset;
-  }
-  
-  /* Mobile */
-  @media (max-width: 480px) {
-    border-radius: 0;
-    padding: 10px 0;
-    flex: 1;
-    height: 100%;
-    justify-content: center;
-  }
-`;
-
-// Player name display
-const PlayerName = styled.div`
-  font-weight: 600;
-  color: white;
-  
-  /* Desktop & Tablet - name above score */
-  @media (min-width: 481px) {
-    margin-bottom: 4px;
-    order: -1;
-  }
-  
-  /* Mobile - name below score */
-  @media (max-width: 480px) {
-    margin-top: 4px;
-    order: 1;
-  }
-`;
-
-const Score = styled.div`
-  font-weight: 700;
-  color: white;
-  
-  /* Desktop */
-  @media (min-width: 769px) {
-    font-size: 1.2rem;
-    order: 1;
-  }
-  
-  /* Tablet */
-  @media (min-width: 481px) and (max-width: 768px) {
-    font-size: 1.2rem;
-    order: 1;
-  }
-  
-  /* Mobile - make score bigger & show first */
-  @media (max-width: 480px) {
-    font-size: 1.4rem;
-    order: -1;
-  }
-`;
-
 const GameOverText = styled.div`
   color: #FF8C00;
   font-weight: bold;
@@ -308,9 +236,9 @@ const Board: React.FC = () => {
     }
   }, [gameOver]);
 
-  const handleCellClick = (row: number, col: number) => {
+  const handleCellClick = useCallback((row: number, col: number) => {
     dispatch(fireShot([row, col]));
-  };
+  }, [dispatch]);
 
 
   const resetScores = () => {
@@ -319,7 +247,7 @@ const Board: React.FC = () => {
     localStorage.setItem('battleshipScores', JSON.stringify(newScores));
   };
 
-  const renderBoard = () => {
+  const renderBoard = useMemo(() => {
     const cells = [];
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -335,11 +263,7 @@ const Board: React.FC = () => {
       }
     }
     return cells;
-  };
-
-  const formatScore = (score: number) => {
-    return score < 10 ? `0${score}` : `${score}`;
-  };
+  }, [board, handleCellClick]);
 
   return (
     <div>
@@ -349,21 +273,15 @@ const Board: React.FC = () => {
       </BoardHeader>
       
       <BoardContainer>
-        {renderBoard()}
+        {renderBoard}
       </BoardContainer>
       
       <ResponsiveContainer>
         <ScoreSection>
           <SectionTitle>Scores</SectionTitle>
           <ScoreRow>
-            <PlayerScore player="player1">
-              <PlayerName>Player 1</PlayerName>
-              <Score>{formatScore(scores.player1)}</Score>
-            </PlayerScore>
-            <PlayerScore player="player2">
-              <PlayerName>Player 2</PlayerName>
-              <Score>{formatScore(scores.player2)}</Score>
-            </PlayerScore>
+            <PlayerScore player="player1" score={scores.player1} />
+            <PlayerScore player="player2" score={scores.player2} />
           </ScoreRow>
           <ResetButton onClick={resetScores} className="tablet-hidden">Reset Scores</ResetButton>
         </ScoreSection>

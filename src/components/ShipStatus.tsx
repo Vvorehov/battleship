@@ -104,7 +104,9 @@ const HealthBar = styled.div`
   }
 `;
 
-const HealthDot = styled.div<{ isHit: boolean }>`
+const HealthDot = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isHit'
+})<{ isHit: boolean }>`
   width: 20px;
   height: 20px;
   display: flex;
@@ -140,16 +142,16 @@ const SunkLabel = styled.div`
 `;
 // ToDO fix -> found mistake in the ship types, destroyer is actually the aircraft carrier
 const shipPics = {
-  destroyer: aircraftImage,
+  carrier: aircraftImage,
   battleship: battleshipImage,
   cruiser: cruiserImage,
+  destroyer: carrierImage,
   submarine: submarineImage,
-  carrier: carrierImage
 };
 
-const shipDisplayOrder = ['destroyer', 'battleship', 'cruiser', 'submarine', 'carrier'] as const;
+const shipDisplayOrder = [  'carrier', 'battleship', 'cruiser', 'submarine', 'destroyer'] as const;
 
-const ShipStatus: React.FC = () => {
+const ShipStatus: React.FC = React.memo(() => {
   const ships = useAppSelector(state => state.game.shipStates);
   
   const renderShip = (shipType: keyof ShipTypes) => {
@@ -190,6 +192,6 @@ const ShipStatus: React.FC = () => {
       </ShipsContainer>
     </StatusContainer>
   );
-};
+});
 
 export default ShipStatus; 

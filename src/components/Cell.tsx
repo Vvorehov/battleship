@@ -11,14 +11,14 @@ interface CellProps {
   onClick: (row: number, col: number) => void;
 }
 
-const CellContainer = styled.div<{ state: CellState }>`
+const CellContainer = styled.div<{ $state: CellState }>`
   width: 100%;
   height: 0;
   padding-bottom: 100%; // square hack
   position: relative;
   border: 1px solid #cccccc;
   background-color: ${props => {
-    switch (props.state) {
+    switch (props.$state) {
       case 'empty':
         return 'white';
       case 'hit':
@@ -31,12 +31,12 @@ const CellContainer = styled.div<{ state: CellState }>`
         return 'white'; 
     }
   }};
-  cursor: ${props => props.state === 'empty' ? 'pointer' : 'default'};
+  cursor: ${props => props.$state === 'empty' ? 'pointer' : 'default'};
   transition: background-color 0.3s ease;
 
   /* Hover effect only applies to empty cells */
   &:hover {
-    background-color: ${props => props.state === 'empty' ? '#f5f5f5' : undefined};
+    background-color: ${props => props.$state === 'empty' ? '#f5f5f5' : undefined};
   }
 `;
 
@@ -84,7 +84,7 @@ const Cell: React.FC<CellProps> = ({ state, row, col, onClick }) => {
 
   return (
     <CellContainer 
-      state={state} 
+      $state={state} 
       onClick={handleClick} 
       data-testid={`cell-${row}-${col}`}
     >

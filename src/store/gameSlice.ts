@@ -16,16 +16,16 @@ const initialShipData = {
     { ship: 'cruiser', positions: [[8,1], [8,2], [8,3]] },
     { ship: 'submarine', positions: [[3,0], [3,1], [3,2]] },
     { ship: 'destroyer', positions: [[0,0], [1,0]] }
-  ]
+  ] as ShipLayout[]
 };
 
 // Initialize the empty board
 const createEmptyBoard = (): CellState[][] => {
-  return Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill('empty'));
+  return Array.from({ length: BOARD_SIZE }).fill(null).map(() => Array(BOARD_SIZE).fill('empty'));
 };
 
 // Initialize ship states
-const initializeShipStates = (layout: ShipLayout[], shipTypes: ShipTypes) => {
+const initializeShipStates = (layout: ShipLayout[]) => {
   const shipStates: GameState['shipStates'] = {
     carrier: { positions: [], hits: [], isSunk: false },
     battleship: { positions: [], hits: [], isSunk: false },
@@ -47,7 +47,7 @@ const initialState: GameState = {
   board: createEmptyBoard(),
   shots: 0,
   hits: 0,
-  shipStates: initializeShipStates(initialShipData.layout, initialShipData.shipTypes),
+  shipStates: initializeShipStates(initialShipData.layout),
   gameOver: false
 };
 
@@ -74,7 +74,16 @@ const gameSlice = createSlice({
   reducers: {
     // Fire at a position
     fireShot: (state, action: PayloadAction<Position>) => {
+      if (state.gameOver) {
+        return;
+      }
       const [row, col] = action.payload;
+
+      if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
+        console.error('Invalid position:', action.payload);
+        return;
+      }
+
       if (state.board[row][col] !== 'empty' || state.gameOver) {
         return;
       }
@@ -85,7 +94,8 @@ const gameSlice = createSlice({
       if (hitShipType) {
         state.board[row][col] = 'hit';
         state.hits += 1;
-        state.shipStates[hitShipType].hits.push(action.payload);
+        const ship = state.shipStates[hitShipType];
+        ship.hits = [...ship.hits, action.payload];
         if (state.shipStates[hitShipType].hits.length === state.shipStates[hitShipType].positions.length) {
           state.shipStates[hitShipType].isSunk = true;
           state.shipStates[hitShipType].positions.forEach(([r, c]) => {
@@ -98,9 +108,13 @@ const gameSlice = createSlice({
       }
     },
     
-    resetGame: () => initialState
+    resetGame: () => ({
+      ...initialState,
+      board: createEmptyBoard(),
+      shipStates: initializeShipStates(initialShipData.layout)
+    })
   }
 });
 
 export const { fireShot, resetGame } = gameSlice.actions;
-export default gameSlice.reducer; 
+export default gameSlice.reducer;
