@@ -1,4 +1,10 @@
-Assignment:‌ 
+# Battleship (2-hour take-home)
+
+▶ **Live demo:** https://vvorehov.github.io/battleship/
+
+React 19 · TypeScript · Redux Toolkit · Styled Components · Vite.
+
+The assignment had a strict 2-hour time limit, so I focused on core gameplay and a responsive layout (320px to desktop). With more time I'd add unit tests and a computer opponent.
 
 
 Design‌ ‌and‌ ‌implement‌ ‌a‌ ‌(partial)‌ ‌Battleship‌ ‌game‌ ‌as‌ ‌a‌ ‌web‌ ‌app.‌
